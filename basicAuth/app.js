@@ -14,9 +14,12 @@ require('./configs/db.config');
 
 // Routers
 const indexRouter = require('./routes/index.routes');
+const authRouter    = require('./routes/auth.routes') 
 
 const app = express();
 
+//generación de sesión
+require("./configs/session.config")(app)
 // Express View engine setup
 
 app.set('views', path.join(__dirname, 'views'));
@@ -33,8 +36,14 @@ app.use(cookieParser());
 const app_name = require('./package.json').name;
 const debug = require('debug')(`${app_name}:${path.basename(__filename).split('.')[0]}`);
 
+///Layout Middleware
+app.use((req, res, next) => {
+  res.locals.usuarioActual = req.session.usuarioActual
+    next()
+})
 // Routes middleware
 app.use('/', indexRouter);
+app.use('/', authRouter)
 
 // Catch missing routes and forward to error handler
 app.use((req, res, next) => next(createError(404)));
